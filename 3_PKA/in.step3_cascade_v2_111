@@ -1,0 +1,45 @@
+# --- 1. SETUP INIZIALE ---
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+
+# --- 2. CARICAMENTO DATI ---
+read_data       hea_equilibrated.data
+
+# --- 3. POTENZIALE ---
+pair_style      meam
+pair_coeff      * * library.meam Co Ni Cr Fe Mn CoNiCrFeMn.meam Co Ni Cr Fe Mn
+
+# --- 4. DEFINIZIONE REGIONI ---
+region          core_box block 8.0 136.0 8.0 136.0 8.0 136.0 units box
+group           core_atoms region core_box
+group           boundary_atoms subtract all core_atoms
+
+# --- 5. SELEZIONE PKA ---
+reset_timestep  0
+region          r_center sphere 72.0 72.0 72.0 1.0
+group           PKA_candidates region r_center
+variable        pka_id equal "count(PKA_candidates)" 
+group           PKA region r_center
+
+# --- 6. FISICA ---
+fix             1 all nve
+fix             2 boundary_atoms langevin 300.0 300.0 1.0 98237
+fix             3 all dt/reset 1 1.0e-5 1.0e-3 0.2
+
+# --- 7. OUTPUT ---
+dump            1 all custom 100 dump.cascade_FINAL.hea id type x y z
+dump_modify     1 sort id
+
+compute         T_core core_atoms temp
+compute         T_bound boundary_atoms temp
+
+thermo          100
+thermo_style    custom step time dt c_T_core c_T_bound pe ke etotal press c_MSD[4]
+
+# --- 8. LANCIO PKA ---
+velocity        PKA set 600.0 600.0 600.0
+
+# --- 9. ESECUZIONE ---
+run             10000

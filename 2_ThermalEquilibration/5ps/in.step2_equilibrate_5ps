@@ -1,0 +1,38 @@
+# --- 1. SETUP ---
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+
+# --- 2. CARICAMENTO SISTEMA RILASSATO ---
+read_data       hea_relaxed.data
+
+# --- 3. POTENZIALE MEAM ---
+pair_style      meam
+pair_coeff      * * library.meam Co Ni Cr Fe Mn CoNiCrFeMn.meam Co Ni Cr Fe Mn
+
+# --- 4. INIZIALIZZAZIONE ---
+# Timestep di 1 fs
+timestep        0.001 
+# Reset del contatore tempo
+reset_timestep  0
+
+# Assegnazione delle velocità iniziali corrispondenti a 300K
+velocity        all create 300.0 4928459 dist gaussian
+
+# --- 5. EQUILIBRATURA NPT ---
+# I parametri 0.1 e 1.0 sono le costanti di smorzamento (Tdamp e Pdamp)
+fix             1 all npt temp 300.0 300.0 0.1 iso 0.0 0.0 1.0
+
+# OUTPUT DATI
+thermo          100
+thermo_style    custom step temp pe press vol density
+
+# OUTPUT
+dump            1 all custom 100 dump.equilibrated.hea id type x y z
+
+# ESECUZIONE 5 ps
+run             5000
+
+# --- 6. SALVATAGGIO FINALE ---
+write_data      hea_equilibrated.data

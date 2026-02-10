@@ -1,0 +1,38 @@
+# --- 1. SETUP ---
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+
+# --- 2. GEOMETRIA ---
+lattice         fcc 3.60
+region          simbox block 0 40 0 40 0 40
+create_box      5 simbox
+create_atoms    1 box
+
+# Creazione lega HEA equiatomica
+set type 1 type/fraction 2 0.20 12345
+set type 1 type/fraction 3 0.25 23456
+set type 1 type/fraction 4 0.33333 34567
+set type 1 type/fraction 5 0.50 45678
+
+# --- 3. POTENZIALE MEAM ---
+mass 1 58.933
+mass 2 58.693
+mass 3 51.996
+mass 4 55.845
+mass 5 54.938
+
+pair_style      meam
+pair_coeff      * * library.meam Co Ni Cr Fe Mn CoNiCrFeMn.meam Co Ni Cr Fe Mn
+
+# --- 4. MINIMIZZAZIONE ---
+thermo          10
+# Uso di fmax (forza massima su un singolo atomo)
+thermo_style    custom step pe press fmax
+
+# Minimizzazione: stop quando energia varia meno di 1.0e-6 oppure forza max < 1.0e-8 
+minimize        1.0e-6 1.0e-8 1000 10000
+
+# Salvataggio dati
+write_data      hea_relaxed.data

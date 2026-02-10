@@ -1,0 +1,31 @@
+# --- 1. SETUP ---
+units           metal
+dimension       3
+boundary        p p p
+atom_style      atomic
+
+# --- 2. CARICAMENTO ---
+read_data       ni_minimized.data
+
+# --- 3. POTENZIALE ---
+pair_style      meam
+pair_coeff      * * library.meam Co Ni Cr Fe Mn CoNiCrFeMn.meam Co Ni Cr Fe Mn
+
+# --- 4. EQUILIBRATURA NPT (300K) ---
+reset_timestep  0
+timestep        0.001
+
+# Velocità iniziali
+velocity        all create 300.0 12345 dist gaussian
+
+# Termostato
+fix             1 all npt temp 300.0 300.0 0.1 iso 0.0 0.0 1.0
+
+# Output
+thermo          100
+thermo_style    custom step temp pe press vol density
+
+run             20000
+
+# --- 5. OUTPUT ---
+write_data      ni_equilibrated.data

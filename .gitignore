@@ -1,0 +1,18 @@
+.DS_Store
+# File pesanti
+*.atom
+*.dump
+*.lammpstrj
+dump.*
+log.*
+
+# SOTTOCARTELLE DA ESCLUDERE (Ovunque siano)
+OLD/
+20ps/
+
+# CARTELLE PRINCIPALI DA ESCLUDERE (Quelle che non vuoi caricare)
+script/
+cluster/
+analysis/
+analysis_results/
+Final_Results_*.csv
